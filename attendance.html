@@ -1,0 +1,260 @@
+<!-- attendance.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Same head content as index.html -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Tracker</title>
+    
+    <!-- External CSS -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Choices.js CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
+    
+    <!-- Firebase Configuration -->
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+    <!-- Firebase Services -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>
+    
+    <!-- Firebase Initialization -->
+    <script>
+        const firebaseConfig = {
+  apiKey: "AIzaSyDZsbPcyY5EoWP5w1huR-1HolVooQMqvPQ",
+  authDomain: "test-kashafa-app.firebaseapp.com",
+  projectId: "test-kashafa-app",
+  storageBucket: "test-kashafa-app.appspot.com",
+  messagingSenderId: "186171212125",
+  appId: "1:186171212125:web:0261507c91eed61c42e8b4",
+  measurementId: "G-5RQV2ZKSTK"
+};
+        firebase.initializeApp(firebaseConfig);
+    </script>
+    
+    <!-- XLSX.js for Excel file generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.1/xlsx.full.min.js"></script>
+    
+    <!-- Choices.js -->
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+    <!-- Set currentPage -->
+    <script>
+        const currentPage = 'attendance';
+    </script>
+</head>
+<body>
+    <!-- Sign-in Modal -->
+    <div id="signInModal" class="modal show" role="dialog" aria-labelledby="signInTitle" aria-modal="true">
+        <!-- Sign-in form as before -->
+        <div class="modal-content gradient-background">
+            <h2 id="signInTitle">Sign In</h2>
+            <form id="signInForm">
+                <label for="signInEmail">Email:</label>
+                <input type="email" id="signInEmail" required aria-required="true" aria-describedby="emailHelp">
+                <small id="emailHelp">We'll never share your email with anyone else.</small>
+                <label for="signInPassword">Password:</label>
+                <input type="password" id="signInPassword" required aria-required="true">
+                <button type="submit">Sign In</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container hidden" id="mainContent">
+        <!-- Navigation Bar -->
+        <nav class="navbar">
+            <div class="navbar-brand">Attendance Tracker</div>
+            <div class="navbar-menu" id="navbarMenu">
+                <!-- Include only attendance-related buttons -->
+                <button class="control-button" data-action="addRecordForm">Add Record</button>
+                <button class="control-button" data-action="bulkAttendanceForm">Add Bulk Attendance</button>
+                <button class="control-button" data-action="importAttendanceForm">Import Attendance</button>
+                <button class="control-button" data-action="calendar">Calendar View</button>
+                <button class="control-button" data-action="table">Table View</button>
+                <button class="control-button" data-action="downloadMonthlyData">Download Monthly Data</button>
+                <button class="control-button" data-action="refreshData">Refresh Data</button>
+
+                <!-- Logout Button -->
+                <button class="control-button" id="logoutButton">Logout</button>
+            </div>
+            <div class="hamburger-menu" id="hamburgerMenu" aria-label="Menu">&#9776;</div>
+        </nav>
+        <button class="back-button" onclick="goBackHome()">Back to Home</button>
+
+
+        <!-- Controls and Filters -->
+        <h1>Attendance Tracker</h1>
+        <div class="controls">
+            <!-- Class Selection -->
+            <label for="classSelect">Select Class:</label>
+            <select id="classSelect">
+                <!-- Options will be populated dynamically -->
+            </select>
+        </div>
+        <div class="filters-container">
+            <div class="search-bar">
+                <input type="text" id="nameSearch" placeholder="Search by Name">
+            </div>
+            <div class="filter-dropdown">
+                <button id="filterbutton" class="filter-button" onclick="toggleFilterDropdown()">Filter</button>
+                <div id="filterDropdownContent" class="modal hidden" onclick="closeModal(event)">
+                    <div class="modal-content" onclick="event.stopPropagation()">
+                        <span class="close" onclick="closeForm('filterDropdownContent')">&times;</span>
+                        <h3>Filter</h3>
+                        <label for="filterName">Search by Name: </label>
+                        <select id="filterName" multiple></select>
+                        <label for="filterDate">Search by Date: </label>
+                        <input type="date" id="filterDate">
+                        <button class="submit-button" onclick="applyFilters(true)">Search</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calendar View -->
+        <div id="calendarView" class="hidden">
+            <div class="calendar-header">
+                <button class="calendar-nav-button" id="prevMonthButton" onclick="changeMonth(-1)">&#10094;</button>
+                <span id="currentMonthYear" class="calendar-month"></span>
+                <button class="calendar-nav-button" id="nextMonthButton" onclick="changeMonth(1)">&#10095;</button>
+            </div>
+            <div class="calendar" id="calendar"></div>
+        </div>
+
+        <!-- Table View -->
+        <div id="tableView" class="hidden">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Class</th>
+                            <th>Name</th>
+                            <th>Date</th>
+                            <th>Attendance</th>
+                            <th>Description</th>
+                            <th>Edit</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendanceTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Modals and Forms -->
+        <!-- Add Record Form -->
+        <!-- Include the relevant modals (same as your original code, but only the ones related to attendance) -->
+        <!-- Add Record Form -->
+<!-- Add Record Form -->
+<div id="addRecordForm" class="modal hidden" role="dialog" aria-labelledby="addRecordTitle" aria-modal="true" onclick="closeModal(event)">
+    <div class="modal-content gradient-background">
+        <span class="close" onclick="closeForm('addRecordForm')">&times;</span>
+        <h3 id="addRecordTitle">Add Record</h3>
+        <!-- Error Message Container -->
+        <div id="addRecordError" class="error-message"></div>
+
+        <!-- Wrap inputs in a form -->
+        <form id="addRecordFormElement">
+            <label for="recordClass">Select Class:</label>
+            <select id="recordClass" required>
+                <!-- Class options will be populated dynamically -->
+            </select>
+
+            <label for="recordName">Enter Name:</label>
+            <select id="recordName" required multiple></select>
+
+            <label for="recordDate">Date: </label>
+            <input type="date" id="recordDate" required>
+            <label for="recordAttendance">Attendance: </label>
+            <select id="recordAttendance" onchange="toggleDescription()">
+                <option value="Attended">Attended</option>
+                <option value="Absent">Absent</option>
+                <option value="Excused">Excused</option>
+            </select>
+            <label for="recordDescription" id="descriptionLabel" class="hidden">Description: </label>
+            <input type="text" id="recordDescription" class="hidden">
+            <button type="button" class="submit-button" onclick="addRecord()">Submit</button>
+        </form>
+    </div>
+</div>
+
+        <!-- Bulk Attendance Form -->
+        <div id="bulkAttendanceForm" class="modal hidden" role="dialog" aria-labelledby="bulkAttendanceTitle" aria-modal="true" onclick="closeModal(event)">
+            <div class="modal-content gradient-background" onclick="event.stopPropagation()">
+                <span class="close" onclick="closeForm('bulkAttendanceForm')">&times;</span>
+                <h3 id="bulkAttendanceTitle">Add Bulk Attendance</h3>
+                <!-- Wrap inputs in a form -->
+                <form id="bulkAttendanceFormElement">
+                    <label for="bulkRecordClass">Select Class:</label>
+                    <select id="bulkRecordClass" required>
+                        <!-- Class options will be populated dynamically -->
+                    </select>
+                    <label for="bulkRecordNames">Enter Names:</label>
+                    <select id="bulkRecordNames" multiple></select>
+                    <label for="bulkRecordDate">Date: </label>
+                    <input type="date" id="bulkRecordDate" required>
+                    <label for="bulkRecordAttendance">Attendance: </label>
+                    <select id="bulkRecordAttendance" required>
+                        <option value="Attended">Attended</option>
+                        <option value="Absent">Absent</option>
+                        <option value="Excused">Excused</option>
+                    </select>
+                    <button type="button" class="submit-button" onclick="addBulkAttendance()">Submit</button>
+                </form>
+            </div>
+        </div>
+
+
+<!-- Import Attendance Form -->
+<div id="importAttendanceForm" class="modal hidden" role="dialog" aria-labelledby="importAttendanceTitle" aria-modal="true" onclick="closeModal(event)">
+    <div class="modal-content gradient-background" onclick="event.stopPropagation()">
+        <span class="close" onclick="closeForm('importAttendanceForm')">&times;</span>
+        <h3 id="importAttendanceTitle">Import Attendance</h3>
+        <!-- Instructions -->
+        <p>Please ensure that the names in your file exactly match the names in the system.</p>
+        <p>Accepted date formats: <strong>YYYY-MM-DD</strong>, <strong>MM/DD/YY</strong>, or <strong>DD-MM-YYYY</strong>.</p>
+        <!-- Download Template Button -->
+        <button type="button" class="submit-button" onclick="downloadAttendanceTemplate()">Download Template</button>
+        <!-- File Input for Upload -->
+        <input type="file" id="attendanceFileInput" accept=".xlsx, .xls, .csv">
+        <!-- Import Button -->
+        <button type="button" class="submit-button" onclick="importAttendance()">Import</button>
+    </div>
+</div>
+
+                <!-- Edit Record Form -->
+        <div id="editRecordForm" class="modal hidden" role="dialog" aria-labelledby="editRecordTitle" aria-modal="true" onclick="closeModal(event)">
+            <div class="modal-content gradient-background" onclick="event.stopPropagation()">
+                <span class="close" onclick="closeForm('editRecordForm')">&times;</span>
+                <h3 id="editRecordTitle">Edit Record</h3>
+                <!-- Error Message Container -->
+                <div id="editRecordError" class="error-message"></div>
+                <label for="editRecordClass">Class:</label>
+                <input type="text" id="editRecordClass" readonly>
+                <label for="editRecordName">Name:</label>
+                <input type="text" id="editRecordName" readonly>
+
+                <label for="editRecordDate">Date: </label>
+                <input type="date" id="editRecordDate" required>
+                <label for="editRecordAttendance">Attendance: </label>
+                <select id="editRecordAttendance" onchange="toggleEditDescription()" required>
+                    <option value="Attended">Attended</option>
+                    <option value="Absent">Absent</option>
+                    <option value="Excused">Excused</option>
+                </select>
+                <label for="editRecordDescription" id="editDescriptionLabel" class="hidden">Description: </label>
+                <input type="text" id="editRecordDescription" class="hidden">
+                <button class="submit-button" onclick="updateRecord()">Update</button>
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="hidden"></div>
+    </div>
+
+    <!-- External JS -->
+    <script src="scripts.js"></script>
+</body>
+</html>
