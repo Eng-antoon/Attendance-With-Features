@@ -1,0 +1,428 @@
+<!-- person_management.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Same head content as index.html -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Person Management</title>
+
+    <!-- External CSS -->
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Choices.js CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
+
+    <!-- Firebase Configuration -->
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+    <!-- Firebase Services -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>
+
+    <!-- Firebase Initialization -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDZsbPcyY5EoWP5w1huR-1HolVooQMqvPQ",
+            authDomain: "test-kashafa-app.firebaseapp.com",
+            projectId: "test-kashafa-app",
+            storageBucket: "test-kashafa-app.appspot.com",
+            messagingSenderId: "186171212125",
+            appId: "1:186171212125:web:0261507c91eed61c42e8b4",
+            measurementId: "G-5RQV2ZKSTK"
+        };
+        firebase.initializeApp(firebaseConfig);
+    </script>
+
+    <!-- XLSX.js for Excel file generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.1/xlsx.full.min.js"></script>
+    
+
+    <!-- Choices.js -->
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+    <!-- Set currentPage -->
+    <script>
+        const currentPage = 'person_management';
+    </script>
+    <style>
+
+.person-action{
+    background-color: #007BFF;
+    color: white;
+    padding: 10px 20px;
+    margin: 10px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;    
+    font-weight: bolder;
+}
+
+
+    </style>
+</head>
+
+<body>
+    <!-- Sign-in Modal -->
+    <div id="signInModal" class="modal show" role="dialog" aria-labelledby="signInTitle" aria-modal="true">
+        <!-- Sign-in form as before -->
+        <div class="modal-content gradient-background">
+            <h2 id="signInTitle">Sign In</h2>
+            <form id="signInForm">
+                <label for="signInEmail">Email:</label>
+                <input type="email" id="signInEmail" required aria-required="true" aria-describedby="emailHelp">
+                <small id="emailHelp">We'll never share your email with anyone else.</small>
+                <label for="signInPassword">Password:</label>
+                <input type="password" id="signInPassword" required aria-required="true">
+                <button type="submit">Sign In</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container hidden" id="mainContent">
+        <!-- Navigation Bar -->
+        <nav class="navbar">
+            <div class="navbar-brand">Person Management</div>
+            <div class="navbar-menu" id="navbarMenu">
+                <!-- Include only person management-related buttons -->
+                <button class="control-button" data-action="addPersonForm">Add Person</button>
+                <button class="control-button" id="createTagButton">Create New Tag</button>
+                <button class="control-button" data-action="manageTagsForm">Manage Tags</button>
+                <button class="control-button" onclick="exportPersons()">Export Persons</button>
+                <button class="control-button" data-action="importPersonForm">Import Persons</button>
+
+                <!-- Logout Button -->
+                <button class="control-button" id="logoutButton">Logout</button>
+            </div>
+            <div class="hamburger-menu" id="hamburgerMenu" aria-label="Menu">&#9776;</div>
+        </nav>
+        <button class="back-button" onclick="goBackHome()">Back to Home</button>
+
+
+        <!-- Main Heading -->
+        <h1>Person Management</h1>
+
+        <!-- Controls -->
+        <div class="controls">
+            <!-- Search Bar -->
+            <div class="search-container">
+                <input type="text" id="personSearch" placeholder="Enter person name...">
+                <button class="control-button" id="filterByButton">Filter By</button>
+
+            </div>
+            <!-- Filter By Button -->
+
+            <!-- Filter Modal -->
+            <div id="filterModal" class="modal hidden" role="dialog" aria-labelledby="filterTitle" aria-modal="true"
+                onclick="closeModal(event)">
+                <div class="modal-content gradient-background" onclick="event.stopPropagation()">
+                    <span class="close" onclick="closeForm('filterModal')">&times;</span>
+                    <h3 id="filterTitle">Filter Persons</h3>
+                    <div class="filter-options">
+                        <div class="filter-group">
+                            <label for="filterFolar">Folar:</label>
+                            <select id="filterFolar">
+                                <option value="">All</option>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filterMonthDOB">Month of Birth:</label>
+                            <select id="filterMonthDOB">
+                                <option value="">All</option>
+                                <option value="01">January</option>
+                                <option value="02">February</option>
+                                <option value="03">March</option>
+                                <option value="04">April</option>
+                                <option value="05">May</option>
+                                <option value="06">June</option>
+                                <option value="07">July</option>
+                                <option value="08">August</option>
+                                <option value="09">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filterTags">Tags:</label>
+                            <select id="filterTags" multiple>
+                                <!-- Tag options will be populated dynamically -->
+                            </select>
+                        </div>
+                        <div class="filter-buttons">
+                            <button class="control-button" id="applyFilterButton">Apply Filters</button>
+                            <button class="control-button" id="cancelFilterButton">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Class Selection -->
+        </div>
+
+        <label for="classSelect">Select Class:</label>
+        <select id="classSelect">
+            <!-- Options will be populated dynamically -->
+        </select>
+        <!-- Person Table -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Unit</th>
+                        <th>Name</th>
+                        <th>Tags</th>
+                        <th>View</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
+
+                    </tr>
+                </thead>
+                <tbody id="personTable">
+                    <!-- Person data will be populated here -->
+                </tbody>
+            </table>
+        </div>
+
+
+        <!-- Import Person Modal -->
+<div id="importPersonModal" class="modal hidden" role="dialog" aria-labelledby="importPersonTitle" aria-modal="true" onclick="closeModal(event)">
+    <div class="modal-content gradient-background" onclick="event.stopPropagation()">
+        <span class="close" onclick="closeForm('importPersonModal')">&times;</span>
+        <h3 id="importPersonTitle">Import Persons</h3>
+        <form id="importPersonForm">
+            <input type="file" id="personFileInput" accept=".xlsx, .xls">
+            <button type="button" class="submit-button" onclick="importPersons()">Import</button>
+        </form>
+        <button class="download-button" onclick="downloadPersonTemplate()">Download Template</button>
+    </div>
+</div>
+
+        <!-- Create Tag Modal -->
+        <div id="createTagModal" class="modal hidden" role="dialog" aria-labelledby="createTagTitle" aria-modal="true"
+            onclick="closeModal(event)">
+            <div class="modal-content gradient-background" onclick="event.stopPropagation()">
+                <span class="close" onclick="closeForm('createTagModal')">&times;</span>
+                <h3 id="createTagTitle">Create New Tag</h3>
+                <form id="createTagForm">
+                    <label for="newTagName">Tag Name:</label>
+                    <input type="text" id="newTagName" required>
+                    <button type="submit" class="submit-button">Create Tag</button>
+                </form>
+            </div>
+        </div>
+
+
+        <!-- View Person Modal -->
+        <div id="viewPersonModal" class="modal hidden" role="dialog" aria-labelledby="viewPersonTitle" aria-modal="true"
+            onclick="closeModal(event)">
+            <div class="modal-content gradient-background personformmodal" onclick="event.stopPropagation()">
+                <span class="close" onclick="closeForm('viewPersonModal')">&times;</span>
+                <h3 id="viewPersonTitle">View Person</h3>
+                <div id="viewPersonError" class="error-message"></div>
+
+                <!-- Disabled Fields -->
+                <label for="viewPersonUnit">Unit:</label>
+                <input type="text" id="viewPersonUnit" disabled>
+
+                <label for="viewPersonName">Name:</label>
+                <input type="text" id="viewPersonName" disabled>
+
+                <label for="viewPersonAddress">Address:</label>
+                <input type="text" id="viewPersonAddress" disabled>
+
+                <label for="viewPersonDOB">Date of Birth:</label>
+                <input type="date" id="viewPersonDOB" disabled>
+
+                <label for="viewPersonMobile">Mobile:</label>
+                <input type="text" id="viewPersonMobile" disabled>
+
+                <label for="viewPersonPhone">Phone:</label>
+                <input type="text" id="viewPersonPhone" disabled>
+
+                <label for="viewPersonEmail">Email:</label>
+                <input type="email" id="viewPersonEmail" disabled>
+
+                <label for="viewPersonSchool">School:</label>
+                <input type="text" id="viewPersonSchool" disabled>
+
+                <label for="viewPersonAcademicYear">Academic Year:</label>
+                <input type="text" id="viewPersonAcademicYear" disabled>
+
+                <label for="viewPersonFamily">Family:</label>
+                <input type="text" id="viewPersonFamily" disabled>
+
+                <label for="viewPersonServant">Servant Name:</label>
+                <input type="text" id="viewPersonServant" disabled>
+
+                <label for="viewPersonAffiliation">Affiliation:</label>
+                <input type="text" id="viewPersonAffiliation" disabled>
+
+                <label for="viewPersonChurch">Church:</label>
+                <input type="text" id="viewPersonChurch" disabled>
+
+                <label for="viewPersonFolar">Received Folar?:</label>
+                <select id="viewPersonFolar" disabled>
+                    <option value="">Select Option</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                </select>
+
+                <!-- Tags -->
+                <label for="viewPersonTags">Tags:</label>
+                <select id="viewPersonTags" multiple disabled>
+                    <!-- Tag options will be populated dynamically -->
+                </select>
+            </div>
+        </div>
+
+        <!-- Modals for Add Person, View/Edit Person -->
+        <!-- Add Person Form -->
+        <div id="addPersonForm" class="modal hidden" role="dialog" aria-labelledby="addPersonTitle" aria-modal="true"
+            onclick="closeModal(event)">
+            <div class="modal-content gradient-background personformmodal" onclick="event.stopPropagation()">
+                <span class="close" onclick="closeForm('addPersonForm')">&times;</span>
+                <h3 id="addPersonTitle">Add Person</h3>
+                <label for="personUnit">Select Unit:</label>
+                <select id="personUnit" required>
+                    <!-- Class options will be populated dynamically -->
+                </select>
+                <label for="personName">Enter Name:</label>
+                <input type="text" id="personName" required>
+                <label for="personAddress">Address:</label>
+                <input type="text" id="personAddress" required>
+                <label for="personDOB">Date of Birth:</label>
+                <input type="date" id="personDOB" required>
+                <label for="personMobile">Mobile:</label>
+                <input type="text" id="personMobile" required>
+                <label for="personPhone">Phone:</label>
+                <input type="text" id="personPhone" required>
+                <label for="personEmail">Email:</label>
+                <input type="email" id="personEmail" required>
+                <label for="personSchool">School:</label>
+                <input type="text" id="personSchool" required>
+                <label for="personAcademicYear">Academic Year:</label>
+                <input type="text" id="personAcademicYear" required>
+                <label for="personFamily">Family:</label>
+                <input type="text" id="personFamily" required>
+                <label for="personServant">Servant Name:</label>
+                <input type="text" id="personServant" required>
+                <label for="personAffiliation">Affiliation:</label>
+                <input type="text" id="personAffiliation" required>
+                <label for="personChurch">Church:</label>
+                <input type="text" id="personChurch" required>
+                <label for="personFolar">Received Folar?:</label>
+                <select id="personFolar" required>
+                    <option value="">Select Option</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                </select>
+                <button class="submit-button" onclick="addPerson()">Submit</button>
+            </div>
+        </div>
+
+        <!-- Manage Tags Modal -->
+<div id="manageTagsModal" class="modal hidden" role="dialog" aria-labelledby="manageTagsTitle" aria-modal="true" onclick="closeModal(event)">
+    <div class="modal-content gradient-background" onclick="event.stopPropagation()">
+        <span class="close" onclick="closeForm('manageTagsModal')">&times;</span>
+        <h3 id="manageTagsTitle">Manage Tags</h3>
+        <div class="modal-body">
+            <table id="tagsTable">
+                <thead>
+                    <tr>
+                        <th>Tag Name</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="tagsTableBody">
+                    <!-- Tags will be populated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+        <!-- Edit Person Modal -->
+        <div id="editPersonModal" class="modal hidden" role="dialog" aria-labelledby="editPersonTitle" aria-modal="true"
+            onclick="closeModal(event)">
+            <div class="modal-content gradient-background edit-contant-modal" onclick="event.stopPropagation()">
+                <span class="close" onclick="closeForm('editPersonModal')">&times;</span>
+                <h3 id="editPersonTitle">Edit Person</h3>
+                <div id="editPersonError" class="error-message"></div>
+
+                <!-- Hidden Input for personId -->
+                <input type="hidden" id="editPersonId">
+
+                <!-- Editable Fields -->
+                <label for="editPersonUnit">Unit:</label>
+                <select id="editPersonUnit" required>
+                    <!-- Class options will be populated dynamically -->
+                </select>
+
+                <label for="editPersonName">Name:</label>
+                <input type="text" id="editPersonName" required>
+
+                <label for="editPersonAddress">Address:</label>
+                <input type="text" id="editPersonAddress">
+
+                <label for="editPersonDOB">Date of Birth:</label>
+                <input type="date" id="editPersonDOB">
+
+                <label for="editPersonMobile">Mobile:</label>
+                <input type="text" id="editPersonMobile">
+
+                <label for="editPersonPhone">Phone:</label>
+                <input type="text" id="editPersonPhone">
+
+                <label for="editPersonEmail">Email:</label>
+                <input type="email" id="editPersonEmail">
+
+                <label for="editPersonSchool">School:</label>
+                <input type="text" id="editPersonSchool">
+
+                <label for="editPersonAcademicYear">Academic Year:</label>
+                <input type="text" id="editPersonAcademicYear">
+
+                <label for="editPersonFamily">Family:</label>
+                <input type="text" id="editPersonFamily">
+
+                <label for="editPersonServant">Servant Name:</label>
+                <input type="text" id="editPersonServant">
+
+                <label for="editPersonAffiliation">Affiliation:</label>
+                <input type="text" id="editPersonAffiliation">
+
+                <label for="editPersonChurch">Church:</label>
+                <input type="text" id="editPersonChurch">
+
+                <label for="editPersonFolar">Received Folar?:</label>
+                <select id="editPersonFolar">
+                    <option value="">Select Option</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                </select>
+
+                <!-- Tags -->
+                <label for="editPersonTags">Tags:</label>
+                <select id="editPersonTags" multiple>
+                    <!-- Tag options will be populated dynamically -->
+                </select>
+
+                <button type="button" class="submit-button" onclick="updatePerson()">Save Changes</button>
+            </div>
+        </div>
+        
+
+        <!-- Toast Notification -->
+        <div id="toast" class="hidden"></div>
+    </div>
+
+    <!-- External JS -->
+    <script src="scripts.js"></script>
+</body>
+
+</html>

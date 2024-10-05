@@ -1,0 +1,112 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Head content -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Tracker</title>
+    
+    <!-- External CSS -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Choices.js CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
+    
+    <!-- Firebase Configuration -->
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+    <!-- Firebase Services -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>
+    
+    <!-- Firebase Initialization -->
+    <script>
+        const firebaseConfig = {
+  apiKey: "AIzaSyDZsbPcyY5EoWP5w1huR-1HolVooQMqvPQ",
+  authDomain: "test-kashafa-app.firebaseapp.com",
+  projectId: "test-kashafa-app",
+  storageBucket: "test-kashafa-app.appspot.com",
+  messagingSenderId: "186171212125",
+  appId: "1:186171212125:web:0261507c91eed61c42e8b4",
+  measurementId: "G-5RQV2ZKSTK"
+};
+        firebase.initializeApp(firebaseConfig);
+    </script>
+    
+    <!-- XLSX.js for Excel file generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.1/xlsx.full.min.js"></script>
+    
+    <!-- Choices.js -->
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+    <!-- Set currentPage -->
+    <script>
+        const currentPage = 'index';
+    </script>
+    <style>
+        #roleOptions{
+    display: flex;
+    align-content: center;
+    justify-content: space-evenly;
+    align-items: center;
+}
+.control-button{
+    background-color: #007BFF;
+    color: white;
+    padding: 10px 20px;
+    margin: 10px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;    
+    width: 21rem;
+    height: 5rem;
+    font-size: 1.2rem;
+    font-weight: bolder;
+}
+#logoutButton{
+
+    text-align: center;
+}
+#mainContent{
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+    </style>
+</head>
+<body>
+    <!-- Sign-in Modal -->
+    <div id="signInModal" class="modal show" role="dialog" aria-labelledby="signInTitle" aria-modal="true">
+        <div class="modal-content gradient-background">
+            <h2 id="signInTitle">Sign In</h2>
+            <form id="signInForm">
+                <label for="signInEmail">Email:</label>
+                <input type="email" id="signInEmail" required aria-required="true" aria-describedby="emailHelp">
+                <small id="emailHelp">We'll never share your email with anyone else.</small>
+                <label for="signInPassword">Password:</label>
+                <input type="password" id="signInPassword" required aria-required="true">
+                <button type="submit">Sign In</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+        <h1>Welcome to the Attendance Tracker</h1>
+        <div class="container hidden" id="mainContent">
+
+        <div id="roleOptions">
+            <!-- Options will be populated based on user role -->
+        </div>
+        <!-- Logout Button -->
+        <button class="control-button" id="logoutButton">Logout</button>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="hidden"></div>
+
+    <!-- External JS -->
+    <script src="scripts.js"></script>
+</body>
+</html>
