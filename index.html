@@ -1,11 +1,11 @@
 <!-- index.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 <head>
     <!-- Head content -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Attendance Tracker</title>
+    <title>متتبع الحضور</title>
     
     <!-- External CSS -->
     <link rel="stylesheet" href="styles.css">
@@ -65,7 +65,6 @@
     font-weight: bolder;
 }
 #logoutButton{
-
     text-align: center;
 }
 #mainContent{
@@ -76,31 +75,31 @@
 
     </style>
 </head>
-<body>
+<body dir="rtl">
     <!-- Sign-in Modal -->
     <div id="signInModal" class="modal show" role="dialog" aria-labelledby="signInTitle" aria-modal="true">
         <div class="modal-content gradient-background">
-            <h2 id="signInTitle">Sign In</h2>
+            <h2 id="signInTitle">تسجيل الدخول</h2>
             <form id="signInForm">
-                <label for="signInEmail">Email:</label>
+                <label for="signInEmail">البريد الإلكتروني:</label>
                 <input type="email" id="signInEmail" required aria-required="true" aria-describedby="emailHelp">
-                <small id="emailHelp">We'll never share your email with anyone else.</small>
-                <label for="signInPassword">Password:</label>
+                <small id="emailHelp">لن نشارك بريدك الإلكتروني مع أي شخص آخر.</small>
+                <label for="signInPassword">كلمة المرور:</label>
                 <input type="password" id="signInPassword" required aria-required="true">
-                <button type="submit">Sign In</button>
+                <button type="submit">تسجيل الدخول</button>
             </form>
         </div>
     </div>
 
     <!-- Main Content -->
-        <h1>Welcome to the Attendance Tracker</h1>
+        <h1>مرحبًا بك في متتبع الحضور</h1>
         <div class="container hidden" id="mainContent">
 
         <div id="roleOptions">
-            <!-- Options will be populated based on user role -->
+            <!-- سيتم ملء الخيارات بناءً على دور المستخدم -->
         </div>
         <!-- Logout Button -->
-        <button class="control-button" id="logoutButton">Logout</button>
+        <button class="control-button" id="logoutButton">تسجيل الخروج</button>
     </div>
 
     <!-- Toast Notification -->

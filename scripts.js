@@ -3126,13 +3126,15 @@ function importPersons() {
         const workbook = XLSX.read(data, { type: 'array' });
         const firstSheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[firstSheetName];
-        const importedData = XLSX.utils.sheet_to_json(worksheet);
+        const importedData = XLSX.utils.sheet_to_json(worksheet, { raw: true }); // Enable raw to get cell types
 
         // Process and validate imported data
         processImportedPersonData(importedData);
     };
     reader.readAsArrayBuffer(file);
 }
+
+    
 async function processImportedPersonData(data) {
     if (!canEdit) {
         showToast('You do not have permission to import persons.');
@@ -3156,6 +3158,26 @@ async function processImportedPersonData(data) {
         return value.toString().trim();
     }
 
+    // Helper function to convert Excel serial date to JS Date
+    function excelSerialDateToJSDate(serial) {
+        const utc_days = Math.floor(serial - 25569);
+        const utc_value = utc_days * 86400 * 1000; // Convert days to milliseconds
+        const date_info = new Date(utc_value);
+
+        const fractional_day = serial - Math.floor(serial) + 0.0000001;
+
+        const total_seconds = Math.floor(86400 * fractional_day);
+
+        const seconds = total_seconds % 60;
+
+        const total_minutes = Math.floor(total_seconds / 60);
+        const minutes = total_minutes % 60;
+
+        const hours = Math.floor(total_minutes / 60);
+
+        return new Date(date_info.getFullYear(), date_info.getMonth(), date_info.getDate(), hours, minutes, seconds);
+    }
+
     for (let index = 0; index < data.length; index++) {
         const entry = data[index];
         const rowNumber = index + 2; // Adjust for header row
@@ -3167,7 +3189,7 @@ async function processImportedPersonData(data) {
         const className = sanitizeEntryValue(entry['Class']);
         const name = sanitizeEntryValue(entry['Name']);
         const address = sanitizeEntryValue(entry['Address']);
-        const dobStr = sanitizeEntryValue(entry['Date of Birth']);
+        const dobRaw = entry['Date of Birth']; // Keep raw for type checking
         const mobile = sanitizeEntryValue(entry['Mobile']);
         const phone = sanitizeEntryValue(entry['Phone']);
         const email = sanitizeEntryValue(entry['Email']);
@@ -3185,7 +3207,7 @@ async function processImportedPersonData(data) {
         if (!className) missingFields.push('Class');
         if (!name) missingFields.push('Name');
         if (!address) missingFields.push('Address');
-        if (!dobStr) missingFields.push('Date of Birth');
+        if (!dobRaw) missingFields.push('Date of Birth');
         if (!mobile) missingFields.push('Mobile');
         if (!phone) missingFields.push('Phone');
         if (!email) missingFields.push('Email');
@@ -3217,31 +3239,44 @@ async function processImportedPersonData(data) {
 
         // Parse date of birth
         let dob;
-        if (/^\d{4}-\d{2}-\d{2}$/.test(dobStr)) {
-            // Format YYYY-MM-DD
-            dob = new Date(dobStr);
-        } else if (/^\d{2}\/\d{2}\/\d{2}$/.test(dobStr)) {
-            // Format MM/DD/YY
-            const parts = dobStr.split('/');
-            const month = parseInt(parts[0], 10) - 1; // Months are 0-based
-            const day = parseInt(parts[1], 10);
-            const year = parseInt(parts[2], 10) + 2000; // Adjust for 21st century
-            dob = new Date(year, month, day);
-        } else if (/^\d{2}-\d{2}-\d{4}$/.test(dobStr)) {
-            // Format DD-MM-YYYY
-            const parts = dobStr.split('-');
-            const day = parseInt(parts[0], 10);
-            const month = parseInt(parts[1], 10) - 1; // Months are 0-based
-            const year = parseInt(parts[2], 10);
-            dob = new Date(year, month, day);
-        } else if (!isNaN(Date.parse(dobStr))) {
-            // Try parsing with Date.parse()
-            dob = new Date(dobStr);
+        if (typeof dobRaw === 'number') {
+            // Excel serial date
+            dob = excelSerialDateToJSDate(dobRaw);
+        } else if (typeof dobRaw === 'string') {
+            // Existing parsing logic
+            if (/^\d{4}-\d{2}-\d{2}$/.test(dobRaw)) {
+                // Format YYYY-MM-DD
+                dob = new Date(dobRaw);
+            } else if (/^\d{2}\/\d{2}\/\d{2}$/.test(dobRaw)) {
+                // Format MM/DD/YY
+                const parts = dobRaw.split('/');
+                const month = parseInt(parts[0], 10) - 1; // Months are 0-based
+                const day = parseInt(parts[1], 10);
+                const year = parseInt(parts[2], 10) + 2000; // Adjust for 21st century
+                dob = new Date(year, month, day);
+            } else if (/^\d{2}-\d{2}-\d{4}$/.test(dobRaw)) {
+                // Format DD-MM-YYYY
+                const parts = dobRaw.split('-');
+                const day = parseInt(parts[0], 10);
+                const month = parseInt(parts[1], 10) - 1; // Months are 0-based
+                const year = parseInt(parts[2], 10);
+                dob = new Date(year, month, day);
+            } else if (!isNaN(Date.parse(dobRaw))) {
+                // Try parsing with Date.parse()
+                dob = new Date(dobRaw);
+            } else {
+                errors.push({
+                    rowNumber,
+                    entry,
+                    reason: `Invalid date format for Date of Birth. Use YYYY-MM-DD, MM/DD/YY, or DD-MM-YYYY.`
+                });
+                continue;
+            }
         } else {
             errors.push({
                 rowNumber,
                 entry,
-                reason: `Invalid date format for Date of Birth. Use YYYY-MM-DD, MM/DD/YY, or DD-MM-YYYY.`
+                reason: `Invalid data type for Date of Birth.`
             });
             continue;
         }
@@ -3255,6 +3290,9 @@ async function processImportedPersonData(data) {
             continue;
         }
 
+        // Format the date as "YYYY-MM-DD"
+        const formattedDob = dob.toISOString().split('T')[0];
+
         // Handle tags
         let tags = tagsStr ? tagsStr.split(',').map(tag => tag.trim()).filter(tag => tag) : [];
 
@@ -3262,7 +3300,7 @@ async function processImportedPersonData(data) {
         const newPersonData = {
             name: name,
             address: address,
-            dob: dobStr,
+            dob: formattedDob, // Store the formatted date string
             mobile: mobile,
             phone: phone,
             email: email,
@@ -3318,6 +3356,12 @@ async function processImportedPersonData(data) {
                 unit: className
             });
 
+            // Optional: Commit batch every 500 operations to avoid exceeding Firestore limits
+            if (operationsCount % 500 === 0) {
+                await batch.commit();
+                batch = db.batch(); // Start a new batch
+            }
+
         } catch (error) {
             errors.push({
                 rowNumber,
@@ -3327,20 +3371,19 @@ async function processImportedPersonData(data) {
         }
     }
 
+    // Commit any remaining operations in the batch
     if (operationsCount > 0) {
-        // Commit batch
-        batch.commit()
-            .then(() => {
-                showToast('Person data imported successfully.');
-                closeForm('importPersonModal');
-                // Refresh data
-                loadPersons();
-                // Reset the file input
-                document.getElementById('personFileInput').value = '';
-            })
-            .catch(error => {
-                showToast('Error importing person data: ' + error.message);
-            });
+        try {
+            await batch.commit();
+            showToast('Person data imported successfully.');
+            closeForm('importPersonModal');
+            // Refresh data
+            loadPersons();
+            // Reset the file input
+            document.getElementById('personFileInput').value = '';
+        } catch (error) {
+            showToast('Error importing person data: ' + error.message);
+        }
     } else {
         showToast('No valid records to import.');
     }

@@ -6,7 +6,7 @@
     <!-- Same head content as index.html -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Person Management</title>
+    <title>إدارة الأشخاص</title>
 
     <!-- External CSS -->
     <link rel="stylesheet" href="styles.css">
@@ -68,14 +68,14 @@
     <div id="signInModal" class="modal show" role="dialog" aria-labelledby="signInTitle" aria-modal="true">
         <!-- Sign-in form as before -->
         <div class="modal-content gradient-background">
-            <h2 id="signInTitle">Sign In</h2>
+            <h2 id="signInTitle">تسجيل الدخول</h2>
             <form id="signInForm">
-                <label for="signInEmail">Email:</label>
+                <label for="signInEmail">البريد الإلكتروني:</label>
                 <input type="email" id="signInEmail" required aria-required="true" aria-describedby="emailHelp">
-                <small id="emailHelp">We'll never share your email with anyone else.</small>
-                <label for="signInPassword">Password:</label>
+                <small id="emailHelp">لن نشارك بريدك الإلكتروني مع أي شخص آخر.</small>
+                <label for="signInPassword">كلمة المرور:</label>
                 <input type="password" id="signInPassword" required aria-required="true">
-                <button type="submit">Sign In</button>
+                <button type="submit">تسجيل الدخول</button>
             </form>
         </div>
     </div>
@@ -84,32 +84,32 @@
     <div class="container hidden" id="mainContent">
         <!-- Navigation Bar -->
         <nav class="navbar">
-            <div class="navbar-brand">Person Management</div>
+            <div class="navbar-brand">إدارة الأشخاص</div>
             <div class="navbar-menu" id="navbarMenu">
                 <!-- Include only person management-related buttons -->
-                <button class="control-button" data-action="addPersonForm">Add Person</button>
-                <button class="control-button" id="createTagButton">Create New Tag</button>
-                <button class="control-button" data-action="manageTagsForm">Manage Tags</button>
-                <button class="control-button" onclick="exportPersons()">Export Persons</button>
-                <button class="control-button" data-action="importPersonForm">Import Persons</button>
+                <button class="control-button" data-action="addPersonForm">إضافة شخص</button>
+                <button class="control-button" id="createTagButton">إنشاء بطاقة جديدة</button>
+                <button class="control-button" data-action="manageTagsForm">إدارة البطاقات</button>
+                <button class="control-button" onclick="exportPersons()">تصدير الأشخاص</button>
+                <button class="control-button" data-action="importPersonForm">استيراد الأشخاص</button>
 
                 <!-- Logout Button -->
-                <button class="control-button" id="logoutButton">Logout</button>
+                <button class="control-button" id="logoutButton">تسجيل الخروج</button>
             </div>
             <div class="hamburger-menu" id="hamburgerMenu" aria-label="Menu">&#9776;</div>
         </nav>
-        <button class="back-button" onclick="goBackHome()">Back to Home</button>
+        <button class="back-button" onclick="goBackHome()">عودة الي الصفحة الرئيسية</button>
 
 
         <!-- Main Heading -->
-        <h1>Person Management</h1>
+        <h1>إدارة الأشخاص</h1>
 
         <!-- Controls -->
         <div class="controls">
             <!-- Search Bar -->
             <div class="search-container">
-                <input type="text" id="personSearch" placeholder="Enter person name...">
-                <button class="control-button" id="filterByButton">Filter By</button>
+                <input type="text" id="personSearch" placeholder="أدخل اسم الشخص...">
+                <button class="control-button" id="filterByButton">التصفية</button>
 
             </div>
             <!-- Filter By Button -->
@@ -119,43 +119,43 @@
                 onclick="closeModal(event)">
                 <div class="modal-content gradient-background" onclick="event.stopPropagation()">
                     <span class="close" onclick="closeForm('filterModal')">&times;</span>
-                    <h3 id="filterTitle">Filter Persons</h3>
+                    <h3 id="filterTitle">تصفية العرض</h3>
                     <div class="filter-options">
                         <div class="filter-group">
-                            <label for="filterFolar">Folar:</label>
+                            <label for="filterFolar">هل حصل على الفولار:</label>
                             <select id="filterFolar">
-                                <option value="">All</option>
-                                <option value="Yes">Yes</option>
-                                <option value="No">No</option>
+                                <option value="">الكل</option>
+                                <option value="Yes">نعم</option>
+                                <option value="No">لا</option>
                             </select>
                         </div>
                         <div class="filter-group">
-                            <label for="filterMonthDOB">Month of Birth:</label>
+                            <label for="filterMonthDOB">شهر الميلاد:</label>
                             <select id="filterMonthDOB">
-                                <option value="">All</option>
-                                <option value="01">January</option>
-                                <option value="02">February</option>
-                                <option value="03">March</option>
-                                <option value="04">April</option>
-                                <option value="05">May</option>
-                                <option value="06">June</option>
-                                <option value="07">July</option>
-                                <option value="08">August</option>
-                                <option value="09">September</option>
-                                <option value="10">October</option>
-                                <option value="11">November</option>
-                                <option value="12">December</option>
+                                <option value="">الكل</option>
+                                <option value="01">يناير</option>
+                                <option value="02">فبراير</option>
+                                <option value="03">مارس</option>
+                                <option value="04">أبريل</option>
+                                <option value="05">مايو</option>
+                                <option value="06">يونيو</option>
+                                <option value="07">يوليو</option>
+                                <option value="08">أغسطس</option>
+                                <option value="09">سبتمبر</option>
+                                <option value="10">أكتوبر</option>
+                                <option value="11">نوفمبر</option>
+                                <option value="12">ديسمبر</option>
                             </select>
                         </div>
                         <div class="filter-group">
-                            <label for="filterTags">Tags:</label>
+                            <label for="filterTags">البطاقات</label>
                             <select id="filterTags" multiple>
                                 <!-- Tag options will be populated dynamically -->
                             </select>
                         </div>
                         <div class="filter-buttons">
-                            <button class="control-button" id="applyFilterButton">Apply Filters</button>
-                            <button class="control-button" id="cancelFilterButton">Cancel</button>
+                            <button class="control-button" id="applyFilterButton">تطبيق التصفية</button>
+                            <button class="control-button" id="cancelFilterButton">إلغاء</button>
                         </div>
                     </div>
                 </div>
@@ -164,7 +164,7 @@
             <!-- Class Selection -->
         </div>
 
-        <label for="classSelect">Select Class:</label>
+        <label for="classSelect">اختار القطاع:</label>
         <select id="classSelect">
             <!-- Options will be populated dynamically -->
         </select>
@@ -173,14 +173,13 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Unit</th>
-                        <th>Name</th>
-                        <th>Tags</th>
-                        <th>View</th>
-                        <th>Edit</th>
-                        <th>Delete</th>
-
-                    </tr>
+                        <th>الوحدة</th>
+                        <th>الاسم</th>
+                        <th>البطاقات</th>
+                        <th>عرض</th>
+                        <th>تعديل</th>
+                        <th>حذف</th>
+                                            </tr>
                 </thead>
                 <tbody id="personTable">
                     <!-- Person data will be populated here -->
@@ -193,12 +192,12 @@
 <div id="importPersonModal" class="modal hidden" role="dialog" aria-labelledby="importPersonTitle" aria-modal="true" onclick="closeModal(event)">
     <div class="modal-content gradient-background" onclick="event.stopPropagation()">
         <span class="close" onclick="closeForm('importPersonModal')">&times;</span>
-        <h3 id="importPersonTitle">Import Persons</h3>
+        <h3 id="importPersonTitle">استيراد الأشخاص</h3>
         <form id="importPersonForm">
             <input type="file" id="personFileInput" accept=".xlsx, .xls">
-            <button type="button" class="submit-button" onclick="importPersons()">Import</button>
+            <button type="button" class="submit-button" onclick="importPersons()">استيراد</button>
         </form>
-        <button class="download-button" onclick="downloadPersonTemplate()">Download Template</button>
+        <button class="download-button" onclick="downloadPersonTemplate()">تحميل الشيت</button>
     </div>
 </div>
 
@@ -207,11 +206,11 @@
             onclick="closeModal(event)">
             <div class="modal-content gradient-background" onclick="event.stopPropagation()">
                 <span class="close" onclick="closeForm('createTagModal')">&times;</span>
-                <h3 id="createTagTitle">Create New Tag</h3>
+                <h3 id="createTagTitle">إنشاء بطاقة جديدة</h3>
                 <form id="createTagForm">
-                    <label for="newTagName">Tag Name:</label>
+                    <label for="newTagName">اسم البطاقة:</label>
                     <input type="text" id="newTagName" required>
-                    <button type="submit" class="submit-button">Create Tag</button>
+                    <button type="submit" class="submit-button">إنشاء البطاقة</button>
                 </form>
             </div>
         </div>
@@ -226,54 +225,54 @@
                 <div id="viewPersonError" class="error-message"></div>
 
                 <!-- Disabled Fields -->
-                <label for="viewPersonUnit">Unit:</label>
-                <input type="text" id="viewPersonUnit" disabled>
+                <label for="viewPersonUnit">اختر القطاع:</label>
+                <input type="text" id="viewPersonUnit" class="viewinputfields" disabled>
 
-                <label for="viewPersonName">Name:</label>
-                <input type="text" id="viewPersonName" disabled>
+                <label for="viewPersonName">الاسم:</label>
+                <input type="text" id="viewPersonName" class="viewinputfields" disabled>
 
-                <label for="viewPersonAddress">Address:</label>
-                <input type="text" id="viewPersonAddress" disabled>
+                <label for="viewPersonAddress">العنوان:</label>
+                <input type="text" id="viewPersonAddress" class="viewinputfields" disabled>
 
-                <label for="viewPersonDOB">Date of Birth:</label>
-                <input type="date" id="viewPersonDOB" disabled>
+                <label for="viewPersonDOB">تاريخ الميلاد:</label>
+                <input type="date" id="viewPersonDOB" class="viewinputfields" disabled>
 
-                <label for="viewPersonMobile">Mobile:</label>
-                <input type="text" id="viewPersonMobile" disabled>
+                <label for="viewPersonMobile">رقم الموبايل:</label>
+                <input type="text" id="viewPersonMobile" class="viewinputfields" disabled>
 
-                <label for="viewPersonPhone">Phone:</label>
-                <input type="text" id="viewPersonPhone" disabled>
+                <label for="viewPersonPhone">الرقم الارضي:</label>
+                <input type="text" id="viewPersonPhone" class="viewinputfields" disabled>
 
-                <label for="viewPersonEmail">Email:</label>
-                <input type="email" id="viewPersonEmail" disabled>
+                <label for="viewPersonEmail">البريد الالكتروني:</label>
+                <input type="email" id="viewPersonEmail" class="viewinputfields" disabled>
 
-                <label for="viewPersonSchool">School:</label>
-                <input type="text" id="viewPersonSchool" disabled>
+                <label for="viewPersonSchool">المدرسة:</label>
+                <input type="text" id="viewPersonSchool" class="viewinputfields" disabled>
 
-                <label for="viewPersonAcademicYear">Academic Year:</label>
-                <input type="text" id="viewPersonAcademicYear" disabled>
+                <label for="viewPersonAcademicYear">السنة الدراسية:</label>
+                <input type="text" id="viewPersonAcademicYear"  class="viewinputfields" disabled>
 
-                <label for="viewPersonFamily">Family:</label>
-                <input type="text" id="viewPersonFamily" disabled>
+                <label for="viewPersonFamily">الاسرة:</label>
+                <input type="text" id="viewPersonFamily" class="viewinputfields" disabled>
 
-                <label for="viewPersonServant">Servant Name:</label>
-                <input type="text" id="viewPersonServant" disabled>
+                <label for="viewPersonServant">اسم الخادم:</label>
+                <input type="text" id="viewPersonServant" class="viewinputfields" disabled>
 
-                <label for="viewPersonAffiliation">Affiliation:</label>
-                <input type="text" id="viewPersonAffiliation" disabled>
+                <label for="viewPersonAffiliation">اسم اب الاعتراف:</label>
+                <input type="text" id="viewPersonAffiliation" class="viewinputfields" disabled>
 
-                <label for="viewPersonChurch">Church:</label>
-                <input type="text" id="viewPersonChurch" disabled>
+                <label for="viewPersonChurch">كنيسة اب الاعتراف:</label>
+                <input type="text" id="viewPersonChurch" class="viewinputfields" disabled>
 
-                <label for="viewPersonFolar">Received Folar?:</label>
+                <label for="viewPersonFolar">هل استلم الفولار؟</label>
                 <select id="viewPersonFolar" disabled>
-                    <option value="">Select Option</option>
-                    <option value="Yes">Yes</option>
-                    <option value="No">No</option>
+                    <option value="">برجاء الاختيار</option>
+                    <option value="Yes">نعم</option>
+                    <option value="No">لا</option>
                 </select>
 
                 <!-- Tags -->
-                <label for="viewPersonTags">Tags:</label>
+                <label for="viewPersonTags">:بطاقات الفرد</label>
                 <select id="viewPersonTags" multiple disabled>
                     <!-- Tag options will be populated dynamically -->
                 </select>
@@ -286,42 +285,42 @@
             onclick="closeModal(event)">
             <div class="modal-content gradient-background personformmodal" onclick="event.stopPropagation()">
                 <span class="close" onclick="closeForm('addPersonForm')">&times;</span>
-                <h3 id="addPersonTitle">Add Person</h3>
-                <label for="personUnit">Select Unit:</label>
+                <h3 id="addPersonTitle">إضافة شخص</h3>
+                <label for="personUnit">اختر القطاع:</label>
                 <select id="personUnit" required>
                     <!-- Class options will be populated dynamically -->
                 </select>
-                <label for="personName">Enter Name:</label>
+                <label for="personName">أدخل الاسم:</label>
                 <input type="text" id="personName" required>
-                <label for="personAddress">Address:</label>
+                <label for="personAddress">العنوان</label>
                 <input type="text" id="personAddress" required>
-                <label for="personDOB">Date of Birth:</label>
+                <label for="personDOB">تاريخ الميلاد:</label>
                 <input type="date" id="personDOB" required>
-                <label for="personMobile">Mobile:</label>
+                <label for="personMobile">رقم الموبايل</label>
                 <input type="text" id="personMobile" required>
-                <label for="personPhone">Phone:</label>
+                <label for="personPhone">الرقم الارضي</label>
                 <input type="text" id="personPhone" required>
-                <label for="personEmail">Email:</label>
+                <label for="personEmail">البريد الالكتروني:</label>
                 <input type="email" id="personEmail" required>
-                <label for="personSchool">School:</label>
+                <label for="personSchool">المدرسة:</label>
                 <input type="text" id="personSchool" required>
-                <label for="personAcademicYear">Academic Year:</label>
+                <label for="personAcademicYear">السنة الدراسية</label>
                 <input type="text" id="personAcademicYear" required>
-                <label for="personFamily">Family:</label>
+                <label for="personFamily">الاسرة</label>
                 <input type="text" id="personFamily" required>
-                <label for="personServant">Servant Name:</label>
+                <label for="personServant">اسم الخادم المسئول</label>
                 <input type="text" id="personServant" required>
-                <label for="personAffiliation">Affiliation:</label>
+                <label for="personAffiliation">اسم اب الاعتراف</label>
                 <input type="text" id="personAffiliation" required>
-                <label for="personChurch">Church:</label>
+                <label for="personChurch">كنيسة اب الاعتراف</label>
                 <input type="text" id="personChurch" required>
-                <label for="personFolar">Received Folar?:</label>
+                <label for="personFolar">استلمت الفولار؟:</label>
                 <select id="personFolar" required>
-                    <option value="">Select Option</option>
-                    <option value="Yes">Yes</option>
-                    <option value="No">No</option>
+                    <option value="">اختار اه او لا</option>
+                    <option value="Yes">اه استلمته</option>
+                    <option value="No">لا مستلمتش</option>
                 </select>
-                <button class="submit-button" onclick="addPerson()">Submit</button>
+                <button class="submit-button" onclick="addPerson()">إرسال</button>
             </div>
         </div>
 
@@ -329,13 +328,13 @@
 <div id="manageTagsModal" class="modal hidden" role="dialog" aria-labelledby="manageTagsTitle" aria-modal="true" onclick="closeModal(event)">
     <div class="modal-content gradient-background" onclick="event.stopPropagation()">
         <span class="close" onclick="closeForm('manageTagsModal')">&times;</span>
-        <h3 id="manageTagsTitle">Manage Tags</h3>
+        <h3 id="manageTagsTitle">تعديل البطاقات</h3>
         <div class="modal-body">
             <table id="tagsTable">
                 <thead>
                     <tr>
-                        <th>Tag Name</th>
-                        <th>Actions</th>
+                        <th>اسم البطاقة</th>
+                        <th>التحكمات</th>
                     </tr>
                 </thead>
                 <tbody id="tagsTableBody">
@@ -351,68 +350,68 @@
             onclick="closeModal(event)">
             <div class="modal-content gradient-background edit-contant-modal" onclick="event.stopPropagation()">
                 <span class="close" onclick="closeForm('editPersonModal')">&times;</span>
-                <h3 id="editPersonTitle">Edit Person</h3>
+                <h3 id="editPersonTitle">تعديل بيانات شخص</h3>
                 <div id="editPersonError" class="error-message"></div>
 
                 <!-- Hidden Input for personId -->
                 <input type="hidden" id="editPersonId">
 
                 <!-- Editable Fields -->
-                <label for="editPersonUnit">Unit:</label>
+                <label for="editPersonUnit">اختر القطاع:</label>
                 <select id="editPersonUnit" required>
                     <!-- Class options will be populated dynamically -->
                 </select>
 
-                <label for="editPersonName">Name:</label>
+                <label for="editPersonName">الاسم:</label>
                 <input type="text" id="editPersonName" required>
 
-                <label for="editPersonAddress">Address:</label>
+                <label for="editPersonAddress">العنوان:</label>
                 <input type="text" id="editPersonAddress">
 
-                <label for="editPersonDOB">Date of Birth:</label>
+                <label for="editPersonDOB">تاريخ الميلاد:</label>
                 <input type="date" id="editPersonDOB">
 
-                <label for="editPersonMobile">Mobile:</label>
+                <label for="editPersonMobile">رقم التليفون:</label>
                 <input type="text" id="editPersonMobile">
 
-                <label for="editPersonPhone">Phone:</label>
+                <label for="editPersonPhone">الرقم الارضي</label>
                 <input type="text" id="editPersonPhone">
 
-                <label for="editPersonEmail">Email:</label>
+                <label for="editPersonEmail">:البريد الالكتروني</label>
                 <input type="email" id="editPersonEmail">
 
-                <label for="editPersonSchool">School:</label>
+                <label for="editPersonSchool">المدرسة:</label>
                 <input type="text" id="editPersonSchool">
 
-                <label for="editPersonAcademicYear">Academic Year:</label>
+                <label for="editPersonAcademicYear">السنة الدراسية</label>
                 <input type="text" id="editPersonAcademicYear">
 
-                <label for="editPersonFamily">Family:</label>
+                <label for="editPersonFamily">الاسرة</label>
                 <input type="text" id="editPersonFamily">
 
-                <label for="editPersonServant">Servant Name:</label>
+                <label for="editPersonServant">اسم الخادم</label>
                 <input type="text" id="editPersonServant">
 
-                <label for="editPersonAffiliation">Affiliation:</label>
+                <label for="editPersonAffiliation">اسم اب الاعتراف</label>
                 <input type="text" id="editPersonAffiliation">
 
-                <label for="editPersonChurch">Church:</label>
+                <label for="editPersonChurch">كنيسة اب الاعتراف</label>
                 <input type="text" id="editPersonChurch">
 
-                <label for="editPersonFolar">Received Folar?:</label>
+                <label for="editPersonFolar">هل استلمت الفولار</label>
                 <select id="editPersonFolar">
-                    <option value="">Select Option</option>
-                    <option value="Yes">Yes</option>
-                    <option value="No">No</option>
+                    <option value="">برجاء الاختيار</option>
+                    <option value="Yes">نعم</option>
+                    <option value="No">لا</option>
                 </select>
 
                 <!-- Tags -->
-                <label for="editPersonTags">Tags:</label>
+                <label for="editPersonTags">:بطاقات الفرد</label>
                 <select id="editPersonTags" multiple>
                     <!-- Tag options will be populated dynamically -->
                 </select>
 
-                <button type="button" class="submit-button" onclick="updatePerson()">Save Changes</button>
+                <button type="button" class="submit-button" onclick="updatePerson()">حفظ التغييرات</button>
             </div>
         </div>
         
