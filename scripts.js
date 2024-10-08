@@ -906,13 +906,21 @@ function populateClassSelect() {
         const option = document.createElement('option');
         option.value = cls;
 
-        // Check the value and set the display text accordingly
+        // Check the value and set the display text accordingly mobtade2
         if (cls === 'ashbal') {
             option.textContent = 'قطاع اشبال';
-        } else if (cls === 'bara3em') {
-            option.textContent = 'قطاع براعم';
+        } else if (cls === 'bara3emBoys') {
+            option.textContent = 'قطاع براعم ولاد';
+        } else if (cls === 'bara3emGirls') {
+            option.textContent = 'قطاع براعم بنات';
+        } else if (cls === 'morshedatMotkademat') {
+            option.textContent = 'قطاع مرشدات متقدمات';
+        } else if (cls === 'morshedat') {
+            option.textContent = 'قطاع مرشدات';
         } else if (cls === 'ra2edat') {
             option.textContent = 'قطاع رائدات';
+        } else if (cls === 'mobtade2') {
+            option.textContent = 'قطاع مبتدأ';
         } else if (cls === 'gawala') {
             option.textContent = 'قطاع جوالة';
         } else if (cls === 'zahrat') {
@@ -1199,11 +1207,36 @@ function toggleDescription() {
         descriptionInput.classList.add('hidden');
     }
 }
+
+
+/**
+ * Removes duplicate persons from the array based on their unique ID.
+ * @param {Array} persons - Array of person objects.
+ * @returns {Array} - Deduplicated array of persons.
+ */
+function deduplicatePersons(persons) {
+    const uniquePersons = [];
+    const personIds = new Set();
+
+    persons.forEach(person => {
+        if (!personIds.has(person.id)) {
+            uniquePersons.push(person);
+            personIds.add(person.id);
+        }
+    });
+
+    return uniquePersons;
+}
+
 // Edit Person Data
 // Edit Person Data
 
 
 // Add Person (with cache update)
+/**
+ * Adds a new person to Firestore and updates the local cache.
+ * Prevents duplication by validating unique mobile and email.
+ */
 async function addPerson() {
     if (!canEdit) {
         showToast('You do not have permission to add persons.');
@@ -1226,7 +1259,8 @@ async function addPerson() {
     const church = document.getElementById('personChurch').value.trim();
     const folar = document.getElementById('personFolar').value;
 
-    if (!unit || !name || !address || !dob || !mobile || !phone || !email || !school || !academicYear || !family || !servant || !affiliation || !church || !folar) {
+    // Basic validation for required fields
+    if (!unit || !name || !address || !dob || !mobile || !folar) {
         showToast('Please fill in all required fields.');
         return;
     }
@@ -1235,7 +1269,7 @@ async function addPerson() {
 
     try {
         // Check for duplicate mobile
-        let querySnapshot = await personsRef.where('mobile', '==', mobile).get();
+        let querySnapshot = await personsRef.where('phone', '==', phone).get();
         if (!querySnapshot.empty) {
             showToast('A person with this mobile number already exists.');
             return;
@@ -1266,38 +1300,59 @@ async function addPerson() {
 
         const docRef = await personsRef.add(newPerson);
 
-        // Update the cache
+        // Update the cache without introducing duplicates
         if (!classPersonsCache[unit]) {
             classPersonsCache[unit] = [];
         }
-        classPersonsCache[unit].push({
+
+        // Check if the person already exists in the cache
+        const existingPerson = classPersonsCache[unit].find(p => p.id === docRef.id);
+        if (!existingPerson) {
+            classPersonsCache[unit].push({
+                id: docRef.id,
+                name: name,
+                unit: unit
+            });
+        }
+
+        // Also update allPersons and ensure no duplicates
+        allPersons.push({
             id: docRef.id,
             name: name,
-            unit: unit
+            unit: unit,
+            address: address,
+            dob: dob,
+            mobile: mobile,
+            phone: phone,
+            email: email,
+            school: school,
+            academicYear: academicYear,
+            family: family,
+            servant: servant,
+            affiliation: affiliation,
+            church: church,
+            folar: folar,
+            tags: [] // Assuming new person has no tags initially
         });
+
+        // Deduplicate allPersons after adding
+        allPersons = deduplicatePersons(allPersons);
 
         showToast('Person added successfully.');
         closeForm('addPersonForm');
-        // Reset form fields
-        document.getElementById('personUnit').value = '';
-        document.getElementById('personName').value = '';
-        document.getElementById('personAddress').value = '';
-        document.getElementById('personDOB').value = '';
-        document.getElementById('personMobile').value = '';
-        document.getElementById('personPhone').value = '';
-        document.getElementById('personEmail').value = '';
-        document.getElementById('personSchool').value = '';
-        document.getElementById('personAcademicYear').value = '';
-        document.getElementById('personFamily').value = '';
-        document.getElementById('personServant').value = '';
-        document.getElementById('personAffiliation').value = '';
-        document.getElementById('personChurch').value = '';
-        document.getElementById('personFolar').value = '';
 
+        // Reset form fields
+        document.getElementById('addPersonForm').reset();
+
+        // Refresh the person table and selects to reflect the new addition
+        populatePersonTable();
+        populatePersonSelects();
     } catch (error) {
         showToast('Error adding person: ' + error.message);
+        console.error('Error adding person:', error);
     }
 }
+
 
 
 // Download Attendance Data as Excel
@@ -1356,24 +1411,30 @@ function toggleEditDescription() {
 
 // Additional modifications to functions like loadPersons, loadAttendance, etc., based on currentPage
 
+/**
+ * Loads persons from Firestore based on the current class selection.
+ * Utilizes caching to optimize data retrieval and prevents duplication.
+ */
 function loadPersons() {
-    allPersons = [];
+    allPersons = []; // Reset the allPersons array to avoid accumulation
     let classesToLoad = [];
 
-    if (currentClass === 'جميع القطاعات') {
+    if (currentClass === 'جميع القطاعات') { // "All Classes" in Arabic
         classesToLoad = allowedClasses;
     } else {
         classesToLoad = [currentClass];
     }
 
-    let promises = classesToLoad.map(cls => {
+    const promises = classesToLoad.map(cls => {
         if (classPersonsCache[cls]) {
+            // Use cached data if available
             allPersons = allPersons.concat(classPersonsCache[cls]);
             return Promise.resolve();
         } else {
+            // Fetch from Firestore if not cached
             return db.collection('classes').doc(cls).collection('persons').get()
                 .then(querySnapshot => {
-                    let classPersons = [];
+                    const classPersons = [];
                     querySnapshot.forEach(doc => {
                         const data = doc.data();
                         classPersons.push({
@@ -1395,20 +1456,31 @@ function loadPersons() {
                             tags: data.tags || []
                         });
                     });
-                    // Cache the persons
+                    // Cache the fetched persons
                     classPersonsCache[cls] = classPersons;
                     allPersons = allPersons.concat(classPersons);
                 });
         }
     });
 
-    Promise.all(promises).then(() => {
-        const searchQuery = personSearchInput ? personSearchInput.value.toLowerCase() : '';
-        applyCombinedFilters(searchQuery, currentFilters);
-    }).catch(error => {
-        showToast('Error loading persons: ' + error.message);
-    });
+    Promise.all(promises)
+        .then(() => {
+            // Deduplicate the allPersons array
+            allPersons = deduplicatePersons(allPersons);
+            console.log('Loaded Persons:', allPersons); // For debugging
+
+            // Populate the person table with deduplicated data
+            populatePersonTable();
+
+            // If using Choices.js for person selections, update them
+            populatePersonSelects();
+        })
+        .catch(error => {
+            showToast('Error loading persons: ' + error.message);
+            console.error('Error loading persons:', error);
+        });
 }
+
 
 
 
@@ -2107,15 +2179,23 @@ function refreshData() {
 function populateAllClassSelects() {
     const classOptions = [];
 
-    // Prepare class options
+    // Prepare class options 
     allowedClasses.forEach(cls => {
         let text = cls;
         if (cls === 'ashbal') {
             text = 'قطاع اشبال';
-        } else if (cls === 'bara3em') {
-            text = 'قطاع براعم';
+        } else if (cls === 'bara3emBoys') {
+            text = 'قطاع براعم ولاد';
+        } else if (cls === 'bara3emGirls') {
+            text = 'قطاع براعم بنات';
+        } else if (cls === 'morshedatMotkademat') {
+            text = 'قطاع مرشدات متقدمات';
         } else if (cls === 'ra2edat') {
             text = 'قطاع رائدات';
+        } else if (cls === 'morshedat') {
+            text = 'قطاع مرشدات';
+        } else if (cls === 'mobtade2') {
+            text = 'قطاع مبتدأ';
         } else if (cls === 'gawala') {
             text = 'قطاع جوالة';
         } else if (cls === 'zahrat') {
@@ -2401,11 +2481,6 @@ async function processImportedAttendanceData(data) {
     }
 }
 
-
-
-
-
-
 function fetchPersonIdByName(className, personName) {
     const personsRef = db.collection('classes').doc(className).collection('persons');
     return personsRef.where('name', '==', personName).get().then(querySnapshot => {
@@ -2471,7 +2546,6 @@ function downloadErrorReport(errors) {
 
     showToast('Some records were not imported due to errors. An error report has been downloaded.');
 }
-
 // Search Persons
 const personSearchInput = document.getElementById('personSearch');
 if (personSearchInput) {
@@ -2488,7 +2562,6 @@ if (personSearchInput) {
         applyCombinedFilters(query, currentFilters);
     });
 }
-
 // Current Filters State
 // Current Filters State
 let currentFilters = {
@@ -2815,7 +2888,7 @@ function updatePerson() {
     const folar = document.getElementById('editPersonFolar').value;
     const tags = editPersonTagsChoices ? editPersonTagsChoices.getValue(true) : [];
 
-    if (!name || !address || !dob || !mobile || !phone || !email || !school || !academicYear || !family || !servant || !affiliation || !church || !folar) {
+    if (!name || !address || !dob || !mobile || !folar) {
         showToast('Person details are incomplete.');
         return;
     }
@@ -3210,13 +3283,13 @@ async function processImportedPersonData(data) {
         if (!dobRaw) missingFields.push('Date of Birth');
         if (!mobile) missingFields.push('Mobile');
         if (!phone) missingFields.push('Phone');
-        if (!email) missingFields.push('Email');
-        if (!school) missingFields.push('School');
-        if (!academicYear) missingFields.push('Academic Year');
-        if (!family) missingFields.push('Family');
-        if (!servant) missingFields.push('Servant Name');
-        if (!affiliation) missingFields.push('Affiliation');
-        if (!church) missingFields.push('Church');
+        // if (!email) missingFields.push('Email');
+        // if (!school) missingFields.push('School');
+        // if (!academicYear) missingFields.push('Academic Year');
+        // if (!family) missingFields.push('Family');
+        // if (!servant) missingFields.push('Servant Name');
+        // if (!affiliation) missingFields.push('Affiliation');
+        // if (!church) missingFields.push('Church');
         if (!folar) missingFields.push('Received Folar?');
 
         if (missingFields.length > 0) {
@@ -3318,12 +3391,12 @@ async function processImportedPersonData(data) {
             const personsRef = db.collection('classes').doc(className).collection('persons');
 
             // Check for duplicate mobile or email
-            const mobileCheck = await personsRef.where('mobile', '==', mobile).get();
+            const mobileCheck = await personsRef.where('phone', '==', phone).get();
             if (!mobileCheck.empty) {
                 errors.push({
                     rowNumber,
                     entry,
-                    reason: `A person with mobile number ${mobile} already exists in class ${className}.`
+                    reason: `A person with mobile number ${phone} already exists in class ${className}.`
                 });
                 continue;
             }
