@@ -3467,33 +3467,46 @@ async function processImportedPersonData(data) {
     }
 }
 
+/**
+ * Ensures that all tags in the provided array exist in Firestore.
+ * Creates new tags if they do not already exist.
+ * @param {Array} tags - Array of tag names to ensure existence.
+ * @returns {Promise<void>}
+ */
 async function handleTags(tags) {
-    if (!tags || tags.length === 0) return;
-
+    if (!tags || !Array.isArray(tags) || tags.length === 0) return;
+    
     const tagsRef = db.collection('tags');
     const existingTags = new Set();
 
-    // Since Firestore `in` queries have a limit of 10, we'll fetch all existing tags first
+    // Fetch all existing tags
     const snapshot = await tagsRef.get();
     snapshot.forEach(doc => {
-        existingTags.add(doc.data().name);
+        existingTags.add(doc.data().name.toLowerCase()); // Use lowercase for case-insensitive comparison
     });
 
     const batch = db.batch();
-    for (const tag of tags) {
-        if (!existingTags.has(tag)) {
-            const tagDocRef = tagsRef.doc();
-            batch.set(tagDocRef, { name: tag });
-            existingTags.add(tag); // Add to existingTags to prevent duplicates in this batch
-        }
-    }
+    let hasNewTags = false;
 
-    if (batch._mutations.length > 0) {
+    tags.forEach(tag => {
+        const tagLower = tag.toLowerCase();
+        if (!existingTags.has(tagLower)) {
+            const tagDocRef = tagsRef.doc(); // Auto-generated ID
+            batch.set(tagDocRef, { name: tag });
+            existingTags.add(tagLower);
+            hasNewTags = true;
+        }
+    });
+
+    if (hasNewTags) {
         await batch.commit();
-        // Optionally refresh tags in the UI
-        refreshTagSelects();
+        console.log('New tags created and batch committed.');
+        refreshTagSelects(); // Update tag selects in the UI
+    } else {
+        console.log('No new tags to create.');
     }
 }
+
 
 function downloadPersonErrorReport(errors) {
     if (errors.length === 0) return;
